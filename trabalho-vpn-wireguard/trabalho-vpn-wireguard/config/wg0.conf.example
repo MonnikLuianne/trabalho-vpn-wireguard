@@ -1,0 +1,13 @@
+# /etc/wireguard/wg0.conf — Gateway da Filial (VM 2)
+# Gerado por scripts/02-configurar-gateway.sh (chave privada omitida)
+
+[Interface]
+Address    = 10.10.10.X/24              # X = 10 + N (N = número do grupo)
+PrivateKey = <CHAVE_PRIVADA_DO_GRUPO>   # NUNCA commitar a chave real
+ListenPort = 51820
+
+[Peer]
+PublicKey           = <CHAVE_PUBLICA_DA_MATRIZ>
+Endpoint            = <IP_DO_SERVIDOR_MATRIZ>:51820
+AllowedIPs          = 10.10.10.0/24     # Split tunneling: só o tráfego da Matriz passa pelo túnel
+PersistentKeepalive = 25
