@@ -2,41 +2,33 @@
 
 **Disciplina:** Segurança em Sistemas Computacionais – UFPI
 **Professor:** Carlos André Batista de Carvalho
-**Grupo N =** _preencher_ → IP do gateway no túnel: `10.10.10.(10+N)`
+**Grupo N = 3**, com IP do Gateway da Filial na VPN `10.10.10.13`
 
+Arquitetura Gateway-to-Gateway (Matriz–Filial) com WireGuard e análise de tráfego no Wireshark.
+
+```
+[ Cliente ] ── rede_filial ── [ Gateway ] ══ túnel WireGuard ══ [ Matriz ]
+192.168.100.2           192.168.100.1   10.10.10.13            10.10.10.1
+```
+
+## Divisão do trabalho
 | Integrante | Responsabilidade |
 |---|---|
-| Integrante 1 | Prática (etapas 1–4), capturas, Q1 e Q2 |
+| Integrante 1 | Parte prática (etapas 1–4), capturas, Q1 e Q2 |
 | Integrante 2 | Análise das capturas: Q3, Q4 e Q5 |
 | Integrante 3 | Q6, Q7, Q8 e montagem do relatório |
 
 ## Estrutura
-```
-capturas/   captura_interna.pcapng, captura_externa.pcapng, captura_keepalive_*.pcapng
-config/     wg0.conf.example, wg0.conf.grupo (sem chave privada), saida_etapa2.txt
-scripts/    roteiro de execução (01 a 06)
-respostas/  q1.md … q8.md
-prints/     q1/ … q8/
-```
+| Pasta | Conteúdo |
+|---|---|
+| `capturas/` | `captura_interna.pcapng` (Ponto A), `captura_externa.pcapng` (Ponto B), `captura_keepalive_25s.pcapng` e `captura_keepalive_5s.pcapng` (Q1c) |
+| `config/` | `wg0.conf` usado no Gateway (sem chave privada) e `comandos_executados.md` |
+| `respostas/` | `q1.md` … `q8.md` |
+| `prints/` | `execucao/` (etapas práticas) e `q1/` … `q8/` |
 
-## Execução (Integrante 1)
+## Como as capturas foram feitas
+As VMs não possuem interface gráfica, então as capturas foram gravadas pelo próprio VirtualBox (`VBoxManage ... nictrace1`) e abertas no Wireshark do computador hospedeiro. O passo a passo está em [`config/comandos_executados.md`](config/comandos_executados.md).
 
-**Etapa 1 – VirtualBox:** importar as VMs e conferir os adaptadores
-- VM 1 (Cliente): 1 adaptador em Rede Interna `rede_filial`
-- VM 2 (Gateway): Adaptador 1 em NAT/Bridge (`eth0`), Adaptador 2 em Rede Interna `rede_filial` (`eth1`)
+> No Wireshark, as datas aparecem como 1969/1970 porque a gravação do VirtualBox conta o tempo a partir da inicialização da VM. A requisição analisada ocorreu em 16/11/2026, às 17:46:18 GMT (cabeçalho `Date:` da resposta HTTP).
 
-Na VM 2, clonar o repositório e instalar as ferramentas:
-```bash
-sudo apt install -y wireguard tcpdump wireshark-common   # se ainda não houver
-```
-
-| Passo | Onde | Comando |
-|---|---|---|
-| 2.1 Gerar chaves e enviar a pública ao monitor | VM 2 | `./scripts/01-gerar-chaves.sh` |
-| 2.2 Montar o wg0.conf | VM 2 | `./scripts/02-configurar-gateway.sh <N> <IP_MATRIZ> <PUB_MATRIZ>` |
-| 2.3 Subir o túnel + forwarding + NAT | VM 2 | `./scripts/03-subir-tunel.sh` |
-| 4 Iniciar as capturas A e B | VM 2 | `./scripts/05-capturas.sh` |
-| 3 Pings e curl (com as capturas rodando) | VM 1 | `./scripts/04-testes-cliente.sh` |
-| Q1(c) Comparar keepalive de 25s e 5s | VM 2 | `./scripts/06-teste-keepalive.sh` |
-
-> ⚠️ A chave privada fica apenas em `/etc/wireguard/` e nunca entra no repositório (ver `.gitignore`).
+> A chave privada do Gateway nunca saiu da VM (`/etc/wireguard/priv`) e não está no repositório.
