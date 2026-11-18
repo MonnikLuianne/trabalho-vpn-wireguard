@@ -18,13 +18,19 @@ Arquitetura Gateway-to-Gateway (Matriz–Filial) com WireGuard e análise de tr�
 | Integrante 2 | Análise das capturas: Q3, Q4 e Q5 |
 | Integrante 3 | Q6, Q7, Q8 e montagem do relatório |
 
+## Relatório
+O relatório completo, com as Questões 1 a 8 e as figuras numeradas, está em [`relatorio.pdf`](relatorio.pdf) (versão para entrega) e em [`relatorio.md`](relatorio.md) (mesmo conteúdo, para leitura no GitHub).
+
+**Entrega:** `relatorio.pdf` + `capturas/captura_interna.pcapng` + `capturas/captura_externa.pcapng`.
+
 ## Estrutura
-| Pasta | Conteúdo |
+| Pasta / arquivo | Conteúdo |
 |---|---|
+| `relatorio.pdf`, `relatorio.md` | Relatório final (capa, ambiente, execução, Q1–Q8, conclusão e referências) |
 | `capturas/` | `captura_interna.pcapng` (Ponto A), `captura_externa.pcapng` (Ponto B), `captura_keepalive_25s.pcapng` e `captura_keepalive_5s.pcapng` (Q1c) |
 | `config/` | `wg0.conf` usado no Gateway (sem chave privada) e `comandos_executados.md` |
-| `respostas/` | `q1.md` … `q8.md` |
-| `prints/` | `execucao/` (etapas práticas) e `q1/` … `q8/` |
+| `respostas/` | `q1.md` … `q8.md`, uma resposta por arquivo |
+| `prints/` | `execucao/` (etapas práticas) e `q1/` … `q8/`. Os prints de Q6–Q8 são saídas do `tshark` (Wireshark em linha de comando) sobre as mesmas capturas |
 
 ## Como as capturas foram feitas
 As VMs não possuem interface gráfica, então as capturas foram gravadas pelo próprio VirtualBox (`VBoxManage ... nictrace1`) e abertas no Wireshark do computador hospedeiro. O passo a passo está em [`config/comandos_executados.md`](config/comandos_executados.md).
