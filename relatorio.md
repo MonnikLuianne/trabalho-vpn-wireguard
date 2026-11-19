@@ -175,8 +175,8 @@ O campo `counter` aumenta a cada pacote (é o *nonce* da cifra e também protege
 
 | Configuração | Intervalo observado | Tamanho | Observação |
 |---|---|---|---|
-| 25 s | ~23 s entre keepalives | 74 bytes | poucos pacotes no período (Figura 10) |
-| 5 s | ~4,7 s entre keepalives | 74 bytes | 24 keepalives exibidos, `counter` de 8 a 23+ (Figura 11) |
+| 25 s | ~23 s entre keepalives | 74 bytes | 6 keepalives em ~93 s (Figura 10) |
+| 5 s | ~4,7 s entre keepalives | 74 bytes | 22 keepalives em ~94 s (contra 6 na captura de 25 s) (Figura 11) |
 
 ![Figura 10](prints/q1/keepalive_25s_wireshark.png)
 
@@ -186,7 +186,7 @@ O campo `counter` aumenta a cada pacote (é o *nonce* da cifra e também protege
 
 <sub>**Figura 11.** Captura com `PersistentKeepalive = 5`: keepalives de 74 bytes a cada ~4,7 s, com o `counter` crescente.</sub>
 
-O tamanho do pacote não muda; apenas a frequência aumenta, cerca de cinco vezes. A pequena diferença entre o intervalo configurado e o observado vem dos *timestamps* da gravação do VirtualBox, baseados no relógio virtual da VM. Na captura de 25 s também aparece um novo par *Handshake Initiation/Response* (190/134 bytes), resultado da renovação periódica das chaves de sessão, que o WireGuard faz a cada 2 minutos.
+O tamanho do pacote não muda; apenas a frequência aumenta, cerca de cinco vezes (22 keepalives contra 6 em um intervalo de ~94 s). Os intervalos medidos ficaram um pouco abaixo dos configurados (~23,2 s e ~4,7 s), diferença que provavelmente se deve à forma como o VirtualBox registra o tempo dos pacotes na gravação. Nas duas capturas também aparece um par *Handshake Initiation/Response* (190/134 bytes), resultado da renovação periódica das chaves de sessão, que o WireGuard faz a cada 2 minutos.
 
 **Conclusão.** Um intervalo menor mantém o mapeamento de NAT com mais folga, mas gera mais tráfego de controle, o que importa em links tarifados e dispositivos móveis. O valor padrão de 25 s é um bom equilíbrio, já que a maioria dos NATs mantém mapeamentos UDP por pelo menos 30 s. Ao final do experimento, o valor foi restaurado para 25 s.
 
@@ -703,7 +703,7 @@ Na prática, buscar as palavras `CONFIDENCIAL`, `dados_confidenciais` ou `curl` 
 
 O experimento mostrou na prática o funcionamento e os limites de uma VPN de camada 3:
 
-- **Estabelecimento do túnel:** o WireGuard autentica os dois lados com pares de chaves Curve25519 e conclui o handshake em uma única ida e volta (190 + 134 bytes). Enquanto a chave do grupo não estava cadastrada, a Matriz simplesmente não respondia. Os *keepalives* de 74 bytes, a cada ~25 s, mantêm o mapeamento do NAT, e um novo handshake renova as chaves a cada 2 minutos (Questão 1).
+- **Estabelecimento do túnel:** o WireGuard autentica os dois lados com pares de chaves Curve25519 e conclui o handshake em uma única ida e volta (190 + 134 bytes). Enquanto a chave do grupo não estava cadastrada, a Matriz simplesmente não respondia. Os *keepalives* de 74 bytes, a cada ~25 s (~23 s medidos), mantêm o mapeamento do NAT, e um novo handshake renova as chaves a cada 2 minutos (Questão 1).
 - **Tunelamento:** na rede interna, a requisição HTTP é legível por completo, inclusive o conteúdo do arquivo confidencial (Questão 3). Na saída externa, ela vira um datagrama UDP 51820 entre os dois *gateways*, sem nenhum vestígio da URL, dos cabeçalhos ou dos endereços originais (Questão 4).
 - **Overhead:** cada pacote ganha 60 bytes fixos (IP + UDP + cabeçalho WireGuard + tag Poly1305) e até 15 bytes de *padding*. O `GET` passou de 168 para 234 bytes. Por isso a `wg0` usa MTU 1420 e o servidor anuncia MSS 1380. Na rede externa existem dois cabeçalhos IP, mas só o externo é visível (Questão 5).
 - **Relação com o IPsec:** o comportamento observado equivale ao ESP em modo túnel (com NAT-T): IP externo novo, datagrama original cifrado e autenticado, identificador de sessão escolhido pelo receptor (como o SPI) e contador contra *replay*. A diferença está no plano de controle: o WireGuard usa algoritmos fixos e configuração mínima, enquanto o IPsec negocia algoritmos e é mais flexível e mais complexo (Questão 6).
