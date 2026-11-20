@@ -20,14 +20,14 @@ Arquitetura Gateway-to-Gateway (Matriz–Filial) com WireGuard e análise de tr�
 | Francielio Evangelista dos Santos Castro | Q6, Q7, Q8 e montagem do relatório |
 
 ## Relatório
-O relatório completo, com as Questões 1 a 8 e as figuras numeradas, está em [`relatorio.pdf`](relatorio.pdf) (versão para entrega) e em [`relatorio.md`](relatorio.md) (mesmo conteúdo, para leitura no GitHub).
+O relatório completo, com as Questões 1 a 8 e as figuras numeradas, está em [`Relatorio_Trabalho02_VPN_WireGuard_SBC.pdf`](Relatorio_Trabalho02_VPN_WireGuard_SBC.pdf) (versão para entrega) e em [`relatorio.md`](relatorio.md) (versão em Markdown para leitura no GitHub).
 
-**Entrega:** `relatorio.pdf` + `capturas/captura_interna.pcapng` + `capturas/captura_externa.pcapng`.
+**Entrega:** `Relatorio_Trabalho02_VPN_WireGuard_SBC.pdf` + `capturas/captura_interna.pcapng` + `capturas/captura_externa.pcapng`.
 
 ## Estrutura
 | Pasta / arquivo | Conteúdo |
 |---|---|
-| `relatorio.pdf`, `relatorio.md` | Relatório final (capa, ambiente, execução, Q1–Q8, conclusão e referências) |
+| `Relatorio_Trabalho02_VPN_WireGuard_SBC.pdf`, `relatorio.md` | Relatório final (capa, ambiente, execução, Q1–Q8, conclusão e referências) |
 | `capturas/` | `captura_interna.pcapng` (Ponto A), `captura_externa.pcapng` (Ponto B), `captura_keepalive_25s.pcapng` e `captura_keepalive_5s.pcapng` (Q1c) |
 | `config/` | `wg0.conf` usado no Gateway (sem chave privada) e `comandos_executados.md` |
 | `respostas/` | `q1.md` … `q8.md`, uma resposta por arquivo |
