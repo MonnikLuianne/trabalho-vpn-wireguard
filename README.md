@@ -15,7 +15,7 @@ Arquitetura Gateway-to-Gateway (Matriz–Filial) com WireGuard e análise de tr�
 ## Divisão do trabalho
 | Integrante | Responsabilidade |
 |---|---|
-| Monnik Luianne | Parte prática (etapas 1–4), capturas, Q1 e Q2 |
+| Monnik Luianne Oliveira Nascimento Veloso Barbosa | Parte prática (etapas 1–4), capturas, Q1 e Q2 |
 | Luidge Sousa Carvalho | Análise das capturas: Q3, Q4 e Q5 |
 | Francielio Evangelista dos Santos Castro | Q6, Q7, Q8 e montagem do relatório |
 
