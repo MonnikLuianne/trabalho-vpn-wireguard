@@ -2,7 +2,7 @@
 
 **Disciplina:** Segurança em Sistemas Computacionais – UFPI
 **Professor:** Carlos André Batista de Carvalho
-**Integrantes:** Monnik Luianne Oliveira Nascimento Veloso Barbosa, Luidge Sousa Carvalho e Francielio Evangelista dos Santos Castro
+**Integrantes:** Monnik Luianne Oliveira Nascimento Veloso Barbosa, Luidge de Sousa Carvalho e Francielio Evangelista dos Santos Castro
 **Grupo N = 3**, com IP do Gateway da Filial na VPN `10.10.10.13`
 
 Arquitetura Gateway-to-Gateway (Matriz–Filial) com WireGuard e análise de tráfego no Wireshark.
@@ -16,7 +16,7 @@ Arquitetura Gateway-to-Gateway (Matriz–Filial) com WireGuard e análise de tr�
 | Integrante | Responsabilidade |
 |---|---|
 | Monnik Luianne Oliveira Nascimento Veloso Barbosa | Parte prática (etapas 1–4), capturas, Q1 e Q2 |
-| Luidge Sousa Carvalho | Análise das capturas: Q3, Q4 e Q5 |
+| Luidge de Sousa Carvalho | Análise das capturas: Q3, Q4 e Q5 |
 | Francielio Evangelista dos Santos Castro | Q6, Q7, Q8 e montagem do relatório |
 
 ## Relatório
