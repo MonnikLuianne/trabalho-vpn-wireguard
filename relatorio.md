@@ -260,7 +260,7 @@ A captura `captura_interna.pcapng` foi gravada na placa de rede do Cliente (Pont
 
 São os **endereços originais** da comunicação: o IP privado do Cliente da Filial e o IP do servidor da Matriz dentro da VPN. Nenhum endereço do túnel (`10.10.10.13`) ou da rede externa aparece aqui, porque o pacote ainda não passou pelo Gateway. A tradução de `192.168.100.2` para `10.10.10.13` (regra `MASQUERADE` na `wg0`, Questão 2) e a cifragem só acontecem quando o pacote sai pela `wg0`. O Gateway é usado apenas como próximo salto: o endereço MAC de destino é o da `eth1` do Gateway (`08:00:27:25:bd:1e`). Também é por isso que as respostas chegam com TTL 63, e não 64: elas passaram por um roteador, o Gateway.
 
-A conexão TCP segue o fluxo normal: *three-way handshake* (pacotes 576–578), `GET` (579), resposta (585 e 587) e encerramento com `FIN` do servidor, enviado junto com o corpo do arquivo (585), e `FIN` do Cliente (589), confirmado pelo `ACK` do servidor (596).
+A conexão TCP segue o fluxo normal: *three-way handshake* (pacotes 576–578), `GET` (579), resposta (585 e 587) e encerramento com o `FIN` do servidor (junto ao corpo do arquivo, 585) e o do Cliente (589), confirmado pelo `ACK` 596.
 
 
 > **Observação:** antes do `SYN, ACK` (pacote 577), o Cliente enviou o `SYN` 9 vezes (1 original e 8 retransmissões) ao longo de cerca de 20 s (pacotes 380 a 576). A captura externa explica o motivo: os `SYN` foram cifrados e enviados à Matriz, mas não houve resposta até o WireGuard renegociar a sessão (ver Questão 4).
@@ -386,13 +386,13 @@ O mesmo pedido HTTP ocupa **66 bytes a mais** na rede externa: um aumento de cer
 | Handshake Initiation / Response | 190 / 134 bytes | Renovação ou recriação da sessão |
 | Dados do `curl` | **138 a 314 bytes** | `Transport Data` com `datalen` > 0 |
 
-Na captura externa, os keepalives periódicos (pacotes 20, 2597, 3025, 3030, 3037, 3038, 3051, 3055) aparecem isolados, a intervalos regulares de cerca de 23,2 s (o valor configurado é 25 s; a diferença vem da forma como o VirtualBox registra o tempo dos pacotes, como explicado na Questão 1), sempre com 74 bytes. Os keepalives 1921 e 3054, também com 74 bytes, são enviados logo depois de cada handshake para confirmar a nova sessão. Os pacotes do `curl` aparecem em rajada: 11 pacotes `Transport Data` entre 18787,22 s e 18787,88 s (pacotes 1926 a 1945), justamente o instante do `curl` na captura interna (Figura 16). O filtro `udp.port == 51820 && frame.len > 74` esconde todos os keepalives e deixa só os handshakes e o tráfego de dados.
+Na captura externa, os keepalives periódicos (pacotes 20, 3025, 3030, 3037, 3038, 3051 e 3055) aparecem isolados, a intervalos regulares de ~23,2 s (25 s configurados; ver Questão 1 sobre a diferença), sempre com 74 bytes. Os keepalives 1921 e 3054, também com 74 bytes, são enviados logo depois de cada handshake para confirmar a nova sessão. Os pacotes do `curl` aparecem em rajada: 11 pacotes `Transport Data` entre 18787,22 s e 18787,88 s (pacotes 1926 a 1945), justamente o instante do `curl` na captura interna (Figura 16). O filtro `udp.port == 51820 && frame.len > 74` esconde todos os keepalives e deixa só os handshakes e o tráfego de dados.
 
 ![Figura 16](prints/q5/keepalive_vs_curl.png)
 
 <sub>**Figura 16.** Tráfego WireGuard na captura externa: rajada de `Transport Data` do `curl` (1926–1945) entre keepalives de 74 bytes e handshakes de renovação.</sub>
 
-Também se nota que, enquanto há tráfego, não é preciso enviar keepalive persistente. Depois do último pacote recebido da Matriz (1945), o Gateway envia um keepalive cerca de 9,5 s depois (2597). É o keepalive "passivo" do WireGuard, que confirma o recebimento quando não há dados para enviar em ~10 s. Depois disso, o ciclo de 25 s do `PersistentKeepalive` volta a valer.
+Também se nota que, enquanto há tráfego, não é preciso enviar keepalive persistente. Depois do último pacote recebido da Matriz (1945), o Gateway envia um keepalive cerca de 9,5 s depois (2597). É o keepalive "passivo" do WireGuard, que confirma o recebimento quando não há dados para enviar em ~10 s. Depois disso, o ciclo do `PersistentKeepalive` volta a valer.
 
 O que **não** dá para saber pela captura externa é o conteúdo: identifica-se que houve uma troca de dados naquele instante, e com quais tamanhos, mas não que era um HTTP `GET` nem qual arquivo foi pedido. A identificação exata, pacote a pacote, só foi possível porque havia a captura interna para comparar:
 
@@ -408,7 +408,7 @@ O que **não** dá para saber pela captura externa é o conteúdo: identifica-se
 | Cabeçalhos HTTP da resposta | 587 / 252 | 1935 / 314 |
 | `ACK` | 588 / 66 | 1936 / 138 |
 | `FIN, ACK` | 589 / 66 | 1937 / 138 |
-| `ACK` do servidor ao `FIN` do Cliente | 596 / 66 | 1945 / 138 |
+| `ACK` do servidor ao `FIN` | 596 / 66 | 1945 / 138 |
 
 
 ### b) A que se deve a diferença de bytes?
@@ -648,7 +648,7 @@ Um atacante posicionado entre o Gateway da Filial e a Matriz (provedor de Intern
 
 - **Pacotes 1241 a 1916:** oito pacotes de 138 bytes, sem resposta, com intervalos de ~1 s e depois 2 s e 4 s. É o padrão de *backoff* de retransmissão do TCP, sugerindo uma tentativa de conexão que não está sendo respondida.
 - **Pacotes 1926 a 1945:** três pacotes de 138 bytes em ida e volta (cara de *three-way handshake*), um pedido de ~150 bytes (234) e uma resposta pequena (170 + 314), seguidos de encerramento. É o perfil de uma requisição curta a um arquivo pequeno, compatível com um download HTTP.
-- ***Keepalives* de 74 bytes a cada ~23–25 s:** revelam que o túnel está ativo mesmo sem uso, que o lado da Filial usa `PersistentKeepalive = 25` e, portanto, que provavelmente está atrás de NAT.
+- ***Keepalives* de 74 bytes a cada ~23,2 s:** revelam que o túnel está ativo mesmo sem uso, que o lado da Filial usa `PersistentKeepalive = 25` e, portanto, que provavelmente está atrás de NAT.
 
 ![Figura 23](prints/q8/analise_trafego.png)
 
