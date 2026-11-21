@@ -260,7 +260,8 @@ A captura `captura_interna.pcapng` foi gravada na placa de rede do Cliente (Pont
 
 São os **endereços originais** da comunicação: o IP privado do Cliente da Filial e o IP do servidor da Matriz dentro da VPN. Nenhum endereço do túnel (`10.10.10.13`) ou da rede externa aparece aqui, porque o pacote ainda não passou pelo Gateway. A tradução de `192.168.100.2` para `10.10.10.13` (regra `MASQUERADE` na `wg0`, Questão 2) e a cifragem só acontecem quando o pacote sai pela `wg0`. O Gateway é usado apenas como próximo salto: o endereço MAC de destino é o da `eth1` do Gateway (`08:00:27:25:bd:1e`). Também é por isso que as respostas chegam com TTL 63, e não 64: elas passaram por um roteador, o Gateway.
 
-A conexão TCP segue o fluxo normal: *three-way handshake* (pacotes 576–578), `GET` (579), resposta (585 e 587) e encerramento com `FIN` (589 e 596).
+A conexão TCP segue o fluxo normal: *three-way handshake* (pacotes 576–578), `GET` (579), resposta (585 e 587) e encerramento com `FIN` do servidor, enviado junto com o corpo do arquivo (585), e `FIN` do Cliente (589), confirmado pelo `ACK` do servidor (596).
+
 
 > **Observação:** antes do `SYN, ACK` (pacote 577), o Cliente enviou o `SYN` 9 vezes (1 original e 8 retransmissões) ao longo de cerca de 20 s (pacotes 380 a 576). A captura externa explica o motivo: os `SYN` foram cifrados e enviados à Matriz, mas não houve resposta até o WireGuard renegociar a sessão (ver Questão 4).
 
@@ -385,7 +386,7 @@ O mesmo pedido HTTP ocupa **66 bytes a mais** na rede externa: um aumento de cer
 | Handshake Initiation / Response | 190 / 134 bytes | Renovação ou recriação da sessão |
 | Dados do `curl` | **138 a 314 bytes** | `Transport Data` com `datalen` > 0 |
 
-Na captura externa, os keepalives periódicos (pacotes 20, 2597, 3025, 3030, 3037, 3038, 3051, 3055) aparecem isolados, a intervalos regulares de cerca de 23–25 s, sempre com 74 bytes. Os keepalives 1921 e 3054, também com 74 bytes, são enviados logo depois de cada handshake para confirmar a nova sessão. Os pacotes do `curl` aparecem em rajada: 11 pacotes `Transport Data` entre 18787,22 s e 18787,88 s (pacotes 1926 a 1945), justamente o instante do `curl` na captura interna (Figura 16). O filtro `udp.port == 51820 && frame.len > 74` esconde todos os keepalives e deixa só os handshakes e o tráfego de dados.
+Na captura externa, os keepalives periódicos (pacotes 20, 2597, 3025, 3030, 3037, 3038, 3051, 3055) aparecem isolados, a intervalos regulares de cerca de 23,2 s (o valor configurado é 25 s; a diferença vem da forma como o VirtualBox registra o tempo dos pacotes, como explicado na Questão 1), sempre com 74 bytes. Os keepalives 1921 e 3054, também com 74 bytes, são enviados logo depois de cada handshake para confirmar a nova sessão. Os pacotes do `curl` aparecem em rajada: 11 pacotes `Transport Data` entre 18787,22 s e 18787,88 s (pacotes 1926 a 1945), justamente o instante do `curl` na captura interna (Figura 16). O filtro `udp.port == 51820 && frame.len > 74` esconde todos os keepalives e deixa só os handshakes e o tráfego de dados.
 
 ![Figura 16](prints/q5/keepalive_vs_curl.png)
 
@@ -407,7 +408,8 @@ O que **não** dá para saber pela captura externa é o conteúdo: identifica-se
 | Cabeçalhos HTTP da resposta | 587 / 252 | 1935 / 314 |
 | `ACK` | 588 / 66 | 1936 / 138 |
 | `FIN, ACK` | 589 / 66 | 1937 / 138 |
-| `ACK` final | 596 / 66 | 1945 / 138 |
+| `ACK` do servidor ao `FIN` do Cliente | 596 / 66 | 1945 / 138 |
+
 
 ### b) A que se deve a diferença de bytes?
 
